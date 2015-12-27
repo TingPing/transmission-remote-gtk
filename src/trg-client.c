@@ -165,8 +165,6 @@ TrgClient *trg_client_new(void)
     priv->pool = g_thread_pool_new((GFunc) dispatch_async_threadfunc, tc,
                                    DISPATCH_POOL_SIZE, TRUE, NULL);
 
-    tr_formatter_size_init(disk_K, _(disk_K_str), _(disk_M_str),
-                           _(disk_G_str), _(disk_T_str));
     tr_formatter_speed_init(speed_K, _(speed_K_str), _(speed_M_str),
                             _(speed_G_str), _(speed_T_str));
 

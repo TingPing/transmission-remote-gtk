@@ -159,13 +159,13 @@ static void
 update_size_stat(JsonObject * args, GtkTreeRowReference * rr,
                  gchar * jsonKey)
 {
-    gchar session_val[32];
-    gchar cumulat_val[32];
+    g_autofree char *session_val;
+    g_autofree char *cumulat_val;
 
-    trg_strlsize(cumulat_val,
+    cumulat_val = g_format_size (
                  json_object_get_int_member(get_cumulat_arg(args),
                                             jsonKey));
-    trg_strlsize(session_val,
+    session_val = g_format_size (
                  json_object_get_int_member(get_session_arg(args),
                                             jsonKey));
 

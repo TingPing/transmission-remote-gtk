@@ -42,12 +42,6 @@
 **** The code for formatting size and speeds, taken from Transmission.
 ***/
 
-const int disk_K = 1024;
-const char *disk_K_str = N_("KiB");
-const char *disk_M_str = N_("MiB");
-const char *disk_G_str = N_("GiB");
-const char *disk_T_str = N_("TiB");
-
 const int speed_K = 1024;
 const char *speed_K_str = N_("KiB/s");
 const char *speed_M_str = N_("MiB/s");
@@ -86,50 +80,6 @@ formatter_init(struct formatter_units *units,
     value *= kilo;
     units->units[TR_FMT_TB].name = g_strdup(tb);
     units->units[TR_FMT_TB].value = value;
-}
-
-static char *formatter_get_size_str(const struct formatter_units *u,
-                                    char *buf, gint64 bytes, size_t buflen)
-{
-    int precision;
-    double value;
-    const char *units;
-    const struct formatter_unit *unit;
-
-    if (bytes < u->units[1].value)
-        unit = &u->units[0];
-    else if (bytes < u->units[2].value)
-        unit = &u->units[1];
-    else if (bytes < u->units[3].value)
-        unit = &u->units[2];
-    else
-        unit = &u->units[3];
-
-    value = (double) bytes / unit->value;
-    units = unit->name;
-    if (unit->value == 1)
-        precision = 0;
-    else if (value < 100)
-        precision = 2;
-    else
-        precision = 1;
-    tr_snprintf(buf, buflen, "%.*f %s", precision, value, units);
-    return buf;
-}
-
-static struct formatter_units size_units;
-
-void
-tr_formatter_size_init(unsigned int kilo,
-                       const char *kb, const char *mb,
-                       const char *gb, const char *tb)
-{
-    formatter_init(&size_units, kilo, kb, mb, gb, tb);
-}
-
-char *tr_formatter_size_B(char *buf, gint64 bytes, size_t buflen)
-{
-    return formatter_get_size_str(&size_units, buf, bytes, buflen);
 }
 
 static struct formatter_units speed_units;
@@ -585,16 +535,6 @@ evutil_vsnprintf(char *buf, size_t buflen, const char *format, va_list ap)
     buf[buflen - 1] = '\0';
     return r;
 #endif
-}
-
-char *tr_strlsize(char *buf, guint64 bytes, size_t buflen)
-{
-    if (!bytes)
-        g_strlcpy(buf, Q_("None"), buflen);
-    else
-        tr_formatter_size_B(buf, bytes, buflen);
-
-    return buf;
 }
 
 gboolean is_minimised_arg(const gchar * arg)

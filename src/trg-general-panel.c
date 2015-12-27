@@ -119,6 +119,9 @@ trg_general_panel_update(TrgGeneralPanel * panel, JsonObject * t,
     gint64 eta, uploaded, haveValid, completedAt;
     GtkLabel *keyLabel;
     gint64 seeders = 0, leechers = 0;
+    g_autofree char *file_size;
+    g_autofree char *uploaded_size;
+    g_autofree char *downloaded_size;
 
     priv = TRG_GENERAL_PANEL_GET_PRIVATE(panel);
 
@@ -129,22 +132,22 @@ trg_general_panel_update(TrgGeneralPanel * panel, JsonObject * t,
 
     sizeOfBuf = sizeof(buf);
 
-    trg_strlsize(buf, torrent_get_size_when_done(t));
-    gtk_label_set_text(GTK_LABEL(priv->gen_size_label), buf);
+    file_size = g_format_size (torrent_get_size_when_done(t));
+    gtk_label_set_text(GTK_LABEL(priv->gen_size_label), file_size);
 
-    trg_strlspeed(buf, torrent_get_rate_down(t) / disk_K);
+    trg_strlspeed(buf, torrent_get_rate_down(t) / speed_K);
     gtk_label_set_text(GTK_LABEL(priv->gen_down_rate_label), buf);
 
-    trg_strlspeed(buf, torrent_get_rate_up(t) / disk_K);
+    trg_strlspeed(buf, torrent_get_rate_up(t) / speed_K);
     gtk_label_set_text(GTK_LABEL(priv->gen_up_rate_label), buf);
 
     uploaded = torrent_get_uploaded(t);
-    trg_strlsize(buf, uploaded);
-    gtk_label_set_text(GTK_LABEL(priv->gen_uploaded_label), buf);
+    uploaded_size = g_format_size (torrent_get_uploaded(t));
+    gtk_label_set_text(GTK_LABEL(priv->gen_uploaded_label), uploaded_size);
 
     haveValid = torrent_get_have_valid(t);
-    trg_strlsize(buf, torrent_get_downloaded(t));
-    gtk_label_set_text(GTK_LABEL(priv->gen_downloaded_label), buf);
+    downloaded_size = g_format_size (torrent_get_downloaded(t));
+    gtk_label_set_text(GTK_LABEL(priv->gen_downloaded_label), downloaded_size);
 
     if (uploaded > 0 && haveValid > 0) {
         trg_strlratio(buf, (double) uploaded / (double) haveValid);

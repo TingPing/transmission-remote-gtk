@@ -375,16 +375,20 @@ static void info_page_update(TrgTorrentPropsDialog * dialog,
         g_free(activityStr);
     }
 
-    tr_strlsize(buf, sizeWhenDone, sizeof(buf));
+    g_autofree char *size_str;
+    size_str = g_format_size (sizeWhenDone);
     gtk_label_set_text(GTK_LABEL(priv->size_lb), buf);
 
-    tr_strlsize(buf, downloaded, sizeof(buf));
+    g_autofree char *downloaded_str;
+    downloaded_str = g_format_size (downloaded);
     gtk_label_set_text(GTK_LABEL(priv->dl_lb), buf);
 
-    tr_strlsize(buf, uploaded, sizeof(buf));
+    g_autofree char *uploaded_str;
+    uploaded_str = g_format_size (uploaded);
     gtk_label_set_text(GTK_LABEL(priv->ul_lb), buf);
 
-    tr_strlsize(buf, haveValid, sizeof(buf));
+    g_autofree char *valid_str;
+    valid_str = g_format_size (haveValid);
     gtk_label_set_text(GTK_LABEL(priv->have_lb), buf);
 }
 

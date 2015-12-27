@@ -164,14 +164,15 @@ void trg_status_bar_session_update(TrgStatusBar * sb, JsonObject * session)
     TrgStatusBarPrivate *priv = TRG_STATUS_BAR_GET_PRIVATE(sb);
     gint64 free = session_get_download_dir_free_space(session);
     gboolean altSpeedEnabled = session_get_alt_speed_enabled(session);
-    gchar freeSpace[64];
 
-    if (free >= 0) {
-        gchar *freeSpaceString;
-        trg_strlsize(freeSpace, free);
-        freeSpaceString = g_strdup_printf(_("Free space: %s"), freeSpace);
-        gtk_label_set_text(GTK_LABEL(priv->free_lbl), freeSpaceString);
-        g_free(freeSpaceString);
+    if (free >= 0)
+    {
+        g_autofree char *freespace;
+        g_autofree char *freespace_label;
+
+        freespace = g_format_size (free);
+        freespace_label = g_strdup_printf(_("Free space: %s"), freespace);
+        gtk_label_set_text(GTK_LABEL(priv->free_lbl), freespace_label);
     } else {
         gtk_label_set_text(GTK_LABEL(priv->free_lbl), "");
     }
@@ -213,8 +214,8 @@ trg_status_bar_update_speed(TrgStatusBar * sb,
             uplimitraw = -1;
     }
 
-    trg_strlspeed(downRateTotalString, stats->downRateTotal / disk_K);
-    trg_strlspeed(upRateTotalString, stats->upRateTotal / disk_K);
+    trg_strlspeed(downRateTotalString, stats->downRateTotal / speed_K);
+    trg_strlspeed(upRateTotalString, stats->upRateTotal / speed_K);
 
     if (uplimitraw >= 0) {
         gchar uplimitstring[32];

@@ -65,10 +65,11 @@ trg_cell_renderer_size_set_property(GObject * object, guint property_id,
     if (property_id == PROP_SIZE_VALUE) {
         gint64 new_value = g_value_get_int64(value);
         if (priv->size_value != new_value) {
-            if (new_value > 0) {
-                char sizeString[32];
-                trg_strlsize(sizeString, new_value);
-                g_object_set(object, "text", sizeString, NULL);
+            if (new_value > 0)
+            {
+                g_autofree char *size_str;
+                size_str = g_format_size (new_value);
+                g_object_set(object, "text", size_str, NULL);
             } else {
                 g_object_set(object, "text", "", NULL);
             }

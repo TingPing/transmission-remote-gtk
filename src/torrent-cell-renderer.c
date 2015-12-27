@@ -138,79 +138,67 @@ static void getProgressString(GString * gstr, TorrentCellRenderer * r)
 
     const gint64 haveTotal = p->haveUnchecked + p->haveValid;
     const int isSeed = p->haveValid >= p->totalSize;
-    char buf1[32], buf2[32], buf3[32], buf4[32], buf5[32], buf6[32];
+    char buf3[32], buf4[32], buf5[32], buf6[32];
     double seedRatio;
     const gboolean hasSeedRatio = getSeedRatio(r, &seedRatio);
 
     if (p->flags & TORRENT_FLAG_DOWNLOADING) {  /* downloading */
+        g_autofree char *have = g_format_size (haveTotal);
+        g_autofree char *total = g_format_size (p->sizeWhenDone);
         g_string_append_printf(gstr,
                                /* %1$s is how much we've got,
                                   %2$s is how much we'll have when done,
                                   %3$s%% is a percentage of the two */
                                _("%1$s of %2$s (%3$s)"),
-                               tr_strlsize(buf1, haveTotal, sizeof(buf1)),
-                               tr_strlsize(buf2, p->sizeWhenDone,
-                                           sizeof(buf2)),
+                               have, total,
                                tr_strlpercent(buf3, p->done,
                                               sizeof(buf3)));
-    } else if (!isSeed) {       /* Partial seed */
-        if (hasSeedRatio) {
-            g_string_append_printf(gstr,
-                                   _
-                                   ("%1$s of %2$s (%3$s), uploaded %4$s (Ratio: %5$s Goal: %6$s)"),
-                                   tr_strlsize(buf1, haveTotal,
-                                               sizeof(buf1)),
-                                   tr_strlsize(buf2, p->totalSize,
-                                               sizeof(buf2)),
-                                   tr_strlpercent(buf3, p->done,
-                                                  sizeof(buf3)),
-                                   tr_strlsize(buf4, p->uploadedEver,
-                                               sizeof(buf4)),
-                                   tr_strlratio(buf5, p->ratio,
-                                                sizeof(buf5)),
-                                   tr_strlratio(buf6, seedRatio,
-                                                sizeof(buf6)));
-        } else {
-            g_string_append_printf(gstr,
-                                   _
-                                   ("%1$s of %2$s (%3$s), uploaded %4$s (Ratio: %5$s)"),
-                                   tr_strlsize(buf1, haveTotal,
-                                               sizeof(buf1)),
-                                   tr_strlsize(buf2, p->totalSize,
-                                               sizeof(buf2)),
-                                   tr_strlpercent(buf3, p->done,
-                                                  sizeof(buf3)),
-                                   tr_strlsize(buf4, p->uploadedEver,
-                                               sizeof(buf4)),
-                                   tr_strlratio(buf5, p->ratio,
-                                                sizeof(buf5)));
-        }
-    } else {                    /* seeding */
+    } else if (!isSeed)
+    {       /* Partial seed */
+        g_autofree char *have = g_format_size (haveTotal);
+        g_autofree char *total = g_format_size (p->totalSize);
+        g_autofree char *uploaded = g_format_size (p->uploadedEver);
 
         if (hasSeedRatio) {
             g_string_append_printf(gstr,
                                    _
-                                   ("%1$s, uploaded %2$s (Ratio: %3$s Goal: %4$s)"),
-                                   tr_strlsize(buf1, p->totalSize,
-                                               sizeof(buf1)),
-                                   tr_strlsize(buf2, p->uploadedEver,
-                                               sizeof(buf2)),
-                                   tr_strlratio(buf3, p->ratio,
-                                                sizeof(buf3)),
-                                   tr_strlratio(buf4, seedRatio,
-                                                sizeof(buf4)));
+                                   ("%1$s of %2$s (%3$s), uploaded %4$s (Ratio: %5$s Goal: %6$s)"),
+                                   have, total,
+                                   tr_strlratio(buf3, p->done, sizeof(buf3)),
+                                   uploaded,
+                                   tr_strlratio(buf5, p->ratio, sizeof(buf5)),
+                                   tr_strlratio(buf6, seedRatio, sizeof(buf6)));
         } else {
+            g_string_append_printf(gstr,
+                                   _
+                                   ("%1$s of %2$s (%3$s), uploaded %4$s (Ratio: %5$s)"),
+                                   have, total,
+                                   tr_strlpercent(buf3, p->done, sizeof(buf3)),
+                                   uploaded,
+                                   tr_strlratio(buf5, p->ratio, sizeof(buf5)));
+        }
+    } else {                    /* seeding */
+
+        if (hasSeedRatio) {
+            g_autofree char *total = g_format_size (p->totalSize);
+            g_autofree char *uploaded = g_format_size (p->uploadedEver);
+            g_string_append_printf(gstr,
+                                   _
+                                   ("%1$s, uploaded %2$s (Ratio: %3$s Goal: %4$s)"),
+                                   total, uploaded,
+                                   tr_strlratio(buf3, p->ratio, sizeof(buf3)),
+                                   tr_strlratio(buf4, seedRatio, sizeof(buf4)));
+        } else {
+            g_autofree char *total = g_format_size (p->sizeWhenDone);
+            g_autofree char *uploaded = g_format_size (p->uploadedEver);
+
             g_string_append_printf(gstr,
                                    /* %1$s is the torrent's total size,
                                       %2$s is how much we've uploaded,
                                       %3$s is our upload-to-download ratio */
                                    _("%1$s, uploaded %2$s (Ratio: %3$s)"),
-                                   tr_strlsize(buf1, p->sizeWhenDone,
-                                               sizeof(buf1)),
-                                   tr_strlsize(buf2, p->uploadedEver,
-                                               sizeof(buf2)),
-                                   tr_strlratio(buf3, p->ratio,
-                                                sizeof(buf3)));
+                                   total, uploaded,
+                                   tr_strlratio(buf3, p->ratio, sizeof(buf3)));
         }
     }
 
